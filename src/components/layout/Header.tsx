@@ -1,6 +1,7 @@
 import Logo from "../ui/Logo";
 import Container from "./Container";
 import DesktopNavigation from "./DesktopNavigation";
+import MobileNavigation from "./MobileNavigation";
 
 const Header = () => {
   return (
@@ -8,6 +9,7 @@ const Header = () => {
       <Container className='py-6 flex items-center justify-between'>
         <Logo />
         <DesktopNavigation />
+        <MobileNavigation />
       </Container>
     </header>
   );
