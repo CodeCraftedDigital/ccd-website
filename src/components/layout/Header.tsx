@@ -1,11 +1,12 @@
 import Logo from "../ui/Logo";
+import Container from "./Container";
 
 const Header = () => {
   return (
     <header className='bg-card border-b border-border'>
-      <div className='container mx-auto px-4 py-6'>
+      <Container className='py-6'>
         <Logo />
-      </div>
+      </Container>
     </header>
   );
 };

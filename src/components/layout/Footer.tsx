@@ -1,14 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
 import Logo from "../ui/Logo";
+import Container from "./Container";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className='bg-card border-t border-border mt-auto'>
-      <div className='py-16'>
+      <Container className='py-16'>
         <div className='container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12'>
           {/* Logo & Description */}
           <div className='flex flex-col gap-6'>
@@ -117,7 +117,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-      </div>
+      </Container>
 
       {/* Bottom Bar */}
       <div className='border-t border-border py-6'>
