@@ -7,7 +7,6 @@ import imageUrlBuilder from "@sanity/image-url";
 import Container from "@/components/layout/Container";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 const builder = imageUrlBuilder(client);
 
@@ -24,6 +23,7 @@ async function getPage(slug: string) {
       title,
       slug,
       content,
+      hideCta,
       seo
     }
   `,
@@ -212,8 +212,8 @@ function RichTextBlock({ block }: { block: any }) {
   );
 }
 
-// CTA Block Component
-function CTABlock({ block }: { block: any }) {
+// CTA Component - always rendered unless hidden
+function CTA() {
   return (
     <Container className='py-12 md:py-16'>
       <div className='relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-white/10 p-8 md:p-12'>
@@ -223,29 +223,21 @@ function CTABlock({ block }: { block: any }) {
         />
         <div className='relative z-10 max-w-2xl'>
           <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>
-            {block.heading}
+            Ready to elevate your digital presence?
           </h3>
-          {block.text && <p className='text-gray-300 mb-8'>{block.text}</p>}
+          <p className='text-gray-300 mb-8'>
+            Let&apos;s discuss how Code Crafted Digital can engineer solutions
+            that drive real results for your business.
+          </p>
           <div className='flex flex-col sm:flex-row gap-4'>
-            {block.primaryButton?.label && (
-              <Button asChild size='lg' className='font-medium'>
-                <Link href={block.primaryButton.url || "#"}>
-                  {block.primaryButton.label}
-                </Link>
-              </Button>
-            )}
-            {block.secondaryButton?.label && (
-              <Button
-                asChild
-                variant='outline'
-                size='lg'
-                className='font-medium'
-              >
-                <a href={block.secondaryButton.url || "#"}>
-                  {block.secondaryButton.label}
-                </a>
-              </Button>
-            )}
+            <Button asChild size='lg' className='font-medium'>
+              <Link href='/contact'>Get A Quote</Link>
+            </Button>
+            <Button asChild variant='outline' size='lg' className='font-medium'>
+              <a href='https://fantastical.app/andrewnichols/code-crafted-digital'>
+                Book A Call
+              </a>
+            </Button>
           </div>
         </div>
       </div>
@@ -260,8 +252,6 @@ function renderBlock(block: any, index: number) {
       return <HeroBlock key={index} block={block} />;
     case "richText":
       return <RichTextBlock key={index} block={block} />;
-    case "cta":
-      return <CTABlock key={index} block={block} />;
     default:
       return null;
   }
@@ -284,6 +274,7 @@ export default async function Page({
       {page.content?.map((block: any, index: number) =>
         renderBlock(block, index),
       )}
+      {!page.hideCta && <CTA />}
     </>
   );
 }
