@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const Logo = ({
   width = 250,
-  height = 250,
+  height = 50,
 }: {
   width?: number;
   height?: number;
