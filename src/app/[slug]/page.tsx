@@ -85,7 +85,7 @@ export async function generateMetadata({
   };
 }
 
-// Portable Text components for rich text rendering
+// Portable Text components
 const portableTextComponents: PortableTextComponents = {
   block: {
     h2: ({ children }) => (
@@ -104,7 +104,9 @@ const portableTextComponents: PortableTextComponents = {
       </h4>
     ),
     normal: ({ children }) => (
-      <p className='text-gray-300 text-lg leading-relaxed mb-6'>{children}</p>
+      <p className='text-base md:text-lg text-gray-300 leading-relaxed mb-5'>
+        {children}
+      </p>
     ),
     blockquote: ({ children }) => (
       <blockquote className='relative my-10 pl-6 md:pl-8'>
@@ -157,66 +159,54 @@ const portableTextComponents: PortableTextComponents = {
   },
   listItem: {
     bullet: ({ children }) => (
-      <li className='flex items-start gap-3 text-lg leading-relaxed'>
-        <span className='mt-2.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0' />
+      <li className='flex items-start gap-3 text-base md:text-lg leading-relaxed'>
+        <span className='mt-2 md:mt-2.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0' />
         <span>{children}</span>
       </li>
     ),
     number: ({ children }) => (
-      <li className='flex items-start gap-3 text-lg leading-relaxed list-decimal list-inside'>
+      <li className='flex items-start gap-3 text-base md:text-lg leading-relaxed list-decimal list-inside'>
         {children}
       </li>
     ),
   },
 };
 
-// Hero Block Component - centered design
+// Hero - Centered, clean, premium
 function HeroBlock({ block }: { block: any }) {
   return (
-    <div className='relative w-full h-[60vh] flex items-center justify-center overflow-hidden'>
+    <section className='relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-hidden'>
       {/* Background Image */}
-      {block.image ? (
-        <Image
-          src={urlFor(block.image).width(1920).height(1080).quality(85).url()}
-          alt={block.image.alt || block.heading}
-          fill
-          className='object-cover'
-          priority
-          sizes='100vw'
-        />
-      ) : (
-        <div
-          className='absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background'
-          aria-hidden='true'
-        />
+      {block.image && (
+        <>
+          <Image
+            src={urlFor(block.image).width(1920).height(1080).quality(85).url()}
+            alt={block.image.alt || block.heading}
+            fill
+            className='object-cover'
+            priority
+            sizes='100vw'
+          />
+          <div
+            className='absolute inset-0 bg-background/85'
+            aria-hidden='true'
+          />
+        </>
       )}
 
-      {/* Gradient Overlays */}
-      <div
-        className='absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/40'
-        aria-hidden='true'
-      />
-      <div className='absolute inset-0 bg-background/30' aria-hidden='true' />
-
-      {/* Content - Centered */}
-      <Container className='relative z-10 text-center'>
-        <h1 className='text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-white mb-6'>
+      <Container className='relative z-10'>
+        <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white text-center'>
           {block.heading}
         </h1>
-        {block.subheading && (
-          <p className='text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
-            {block.subheading}
-          </p>
-        )}
       </Container>
-    </div>
+    </section>
   );
 }
 
-// Rich Text Block Component
+// Rich Text Block
 function RichTextBlock({ block }: { block: any }) {
   return (
-    <Container className='py-16 md:py-20'>
+    <Container className='pt-10 pb-6 md:pt-14 md:pb-8'>
       <article className='max-w-3xl mx-auto'>
         <PortableText
           value={block.content}
@@ -227,7 +217,7 @@ function RichTextBlock({ block }: { block: any }) {
   );
 }
 
-// CTA Component - uses page overrides or defaults
+// CTA
 function CTA({ page }: { page: any }) {
   const heading = page.ctaHeading || CTA_DEFAULTS.heading;
   const text = page.ctaText || CTA_DEFAULTS.text;
@@ -237,7 +227,7 @@ function CTA({ page }: { page: any }) {
   const secondaryUrl = page.ctaSecondaryUrl || CTA_DEFAULTS.secondaryUrl;
 
   return (
-    <Container className='py-12 md:py-16'>
+    <Container className='pt-4 pb-16 md:pt-6 md:pb-20'>
       <div className='relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-white/10 p-8 md:p-12'>
         <div
           className='absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2'
