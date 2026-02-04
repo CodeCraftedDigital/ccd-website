@@ -12,6 +12,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import imageUrlBuilder from "@sanity/image-url";
+import Container from "@/components/layout/Container";
 
 const builder = imageUrlBuilder(client);
 
@@ -32,7 +33,7 @@ const BlogPage = async () => {
   `);
 
   return (
-    <main className='container mx-auto px-4 py-12'>
+    <Container className='py-12'>
       <h1 className='text-4xl font-bold mb-8'>Blog</h1>
 
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -82,7 +83,7 @@ const BlogPage = async () => {
               <div className='mt-auto'>
                 <Separator />
                 <CardFooter className='p-0 h-12 flex items-center justify-start px-6'>
-                  <span className='text-sm text-primary flex items-center gap-2 group-hover:gap-3 group-hover:underline transition-all font-medium'>
+                  <span className='text-sm text-white flex items-center gap-2 group-hover:gap-3 group-hover:text-primary group-hover:underline transition-all font-medium'>
                     Read More <ArrowRight className='w-4 h-4' />
                   </span>
                 </CardFooter>
@@ -91,7 +92,7 @@ const BlogPage = async () => {
           </Link>
         ))}
       </div>
-    </main>
+    </Container>
   );
 };
 
