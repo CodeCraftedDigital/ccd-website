@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Logo = ({
-  width = 250,
-  height = 50,
+  width = 200,
+  height = 29,
 }: {
   width?: number;
   height?: number;
