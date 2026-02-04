@@ -229,10 +229,20 @@ export default async function BlogPostPage({
 
   return (
     <>
-      {/* Hero Section */}
-      <div className='relative w-full min-h-[60vh] flex items-end'>
-        {/* Background Image - Using Next.js Image for LCP optimization */}
-        {post.image && (
+      {/* 
+        Hero Section 
+        - Fixed height prevents CLS (content layout shift)
+        - Using h-[60vh] instead of min-h-[60vh] reserves exact space
+        - overflow-hidden contains the image
+      */}
+      <div className='relative w-full h-[60vh] flex items-end overflow-hidden'>
+        {/* 
+          Background Image 
+          - Next.js Image with priority for LCP optimization
+          - fill + sizes="100vw" for proper srcset generation
+          - quality 85 balances visual quality vs file size
+        */}
+        {post.image ? (
           <Image
             src={urlFor(post.image).width(1920).height(1080).quality(85).url()}
             alt={post.image.alt || post.title}
@@ -241,9 +251,19 @@ export default async function BlogPostPage({
             priority
             sizes='100vw'
           />
+        ) : (
+          // Fallback gradient when no image - same dimensions, no shift
+          <div
+            className='absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background'
+            aria-hidden='true'
+          />
         )}
 
-        {/* Gradient Overlays - CSS only, no paint impact */}
+        {/* 
+          Gradient Overlays 
+          - Pure CSS, no paint impact
+          - aria-hidden for accessibility
+        */}
         <div
           className='absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/20'
           aria-hidden='true'
