@@ -14,6 +14,16 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
+// CTA Defaults
+const CTA_DEFAULTS = {
+  heading: "Ready to elevate your digital presence?",
+  text: "Let's discuss how Code Crafted Digital can engineer solutions that drive real results for your business.",
+  primaryLabel: "Get A Quote",
+  primaryUrl: "/contact",
+  secondaryLabel: "Book A Call",
+  secondaryUrl: "https://fantastical.app/andrewnichols/code-crafted-digital",
+};
+
 // Fetch page by slug
 async function getPage(slug: string) {
   return client.fetch(
@@ -24,6 +34,12 @@ async function getPage(slug: string) {
       slug,
       content,
       hideCta,
+      ctaHeading,
+      ctaText,
+      ctaPrimaryLabel,
+      ctaPrimaryUrl,
+      ctaSecondaryLabel,
+      ctaSecondaryUrl,
       seo
     }
   `,
@@ -73,17 +89,17 @@ export async function generateMetadata({
 const portableTextComponents: PortableTextComponents = {
   block: {
     h2: ({ children }) => (
-      <h2 className='text-2xl md:text-3xl font-bold mt-10 mb-5 text-white tracking-tight'>
+      <h2 className='text-2xl md:text-3xl font-bold mt-12 mb-5 text-white tracking-tight'>
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className='text-xl md:text-2xl font-semibold mt-8 mb-4 text-white'>
+      <h3 className='text-xl md:text-2xl font-semibold mt-10 mb-4 text-white'>
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className='text-lg md:text-xl font-semibold mt-6 mb-3 text-white'>
+      <h4 className='text-lg md:text-xl font-semibold mt-8 mb-3 text-white'>
         {children}
       </h4>
     ),
@@ -154,10 +170,10 @@ const portableTextComponents: PortableTextComponents = {
   },
 };
 
-// Hero Block Component
+// Hero Block Component - centered design
 function HeroBlock({ block }: { block: any }) {
   return (
-    <div className='relative w-full h-[50vh] flex items-end overflow-hidden'>
+    <div className='relative w-full h-[60vh] flex items-center justify-center overflow-hidden'>
       {/* Background Image */}
       {block.image ? (
         <Image
@@ -177,21 +193,20 @@ function HeroBlock({ block }: { block: any }) {
 
       {/* Gradient Overlays */}
       <div
-        className='absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/20'
+        className='absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/40'
         aria-hidden='true'
       />
-      <div
-        className='absolute inset-0 bg-gradient-to-r from-background/50 to-transparent'
-        aria-hidden='true'
-      />
+      <div className='absolute inset-0 bg-background/30' aria-hidden='true' />
 
-      {/* Content */}
-      <Container className='relative z-10 pb-12 pt-32'>
-        <h1 className='text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight text-white max-w-4xl mb-4'>
+      {/* Content - Centered */}
+      <Container className='relative z-10 text-center'>
+        <h1 className='text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-white mb-6'>
           {block.heading}
         </h1>
         {block.subheading && (
-          <p className='text-xl text-gray-300 max-w-2xl'>{block.subheading}</p>
+          <p className='text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed'>
+            {block.subheading}
+          </p>
         )}
       </Container>
     </div>
@@ -201,19 +216,26 @@ function HeroBlock({ block }: { block: any }) {
 // Rich Text Block Component
 function RichTextBlock({ block }: { block: any }) {
   return (
-    <Container className='py-12 md:py-16'>
-      <div className='max-w-3xl mx-auto'>
+    <Container className='py-16 md:py-20'>
+      <article className='max-w-3xl mx-auto'>
         <PortableText
           value={block.content}
           components={portableTextComponents}
         />
-      </div>
+      </article>
     </Container>
   );
 }
 
-// CTA Component - always rendered unless hidden
-function CTA() {
+// CTA Component - uses page overrides or defaults
+function CTA({ page }: { page: any }) {
+  const heading = page.ctaHeading || CTA_DEFAULTS.heading;
+  const text = page.ctaText || CTA_DEFAULTS.text;
+  const primaryLabel = page.ctaPrimaryLabel || CTA_DEFAULTS.primaryLabel;
+  const primaryUrl = page.ctaPrimaryUrl || CTA_DEFAULTS.primaryUrl;
+  const secondaryLabel = page.ctaSecondaryLabel || CTA_DEFAULTS.secondaryLabel;
+  const secondaryUrl = page.ctaSecondaryUrl || CTA_DEFAULTS.secondaryUrl;
+
   return (
     <Container className='py-12 md:py-16'>
       <div className='relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-white/10 p-8 md:p-12'>
@@ -222,21 +244,16 @@ function CTA() {
           aria-hidden='true'
         />
         <div className='relative z-10 max-w-2xl'>
-          <h3 className='text-2xl md:text-3xl font-bold text-white mb-4'>
-            Ready to elevate your digital presence?
-          </h3>
-          <p className='text-gray-300 mb-8'>
-            Let&apos;s discuss how Code Crafted Digital can engineer solutions
-            that drive real results for your business.
-          </p>
+          <h2 className='text-2xl md:text-3xl font-bold text-white mb-4'>
+            {heading}
+          </h2>
+          <p className='text-gray-300 mb-8'>{text}</p>
           <div className='flex flex-col sm:flex-row gap-4'>
             <Button asChild size='lg' className='font-medium'>
-              <Link href='/contact'>Get A Quote</Link>
+              <Link href={primaryUrl}>{primaryLabel}</Link>
             </Button>
             <Button asChild variant='outline' size='lg' className='font-medium'>
-              <a href='https://fantastical.app/andrewnichols/code-crafted-digital'>
-                Book A Call
-              </a>
+              <a href={secondaryUrl}>{secondaryLabel}</a>
             </Button>
           </div>
         </div>
@@ -274,7 +291,7 @@ export default async function Page({
       {page.content?.map((block: any, index: number) =>
         renderBlock(block, index),
       )}
-      {!page.hideCta && <CTA />}
+      {!page.hideCta && <CTA page={page} />}
     </>
   );
 }
