@@ -24,9 +24,9 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div className='flex flex-col gap-4'>
-          <h4 className='text-white font-bold text-base tracking-wide'>
+          <p className='text-white font-bold text-base tracking-wide'>
             Quick Links
-          </h4>
+          </p>
           <ul className='flex flex-col gap-3'>
             <li>
               <Link
@@ -73,9 +73,9 @@ export default function Footer() {
 
         {/* Contact Us */}
         <div className='flex flex-col gap-4'>
-          <h4 className='text-white font-bold text-base tracking-wide'>
+          <p className='text-white font-bold text-base tracking-wide'>
             Contact Us
-          </h4>
+          </p>
           <ul className='flex flex-col gap-4'>
             <li className='flex items-start gap-3'>
               <Phone

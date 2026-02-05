@@ -15,7 +15,10 @@ import { navigationLinks } from "@/lib/data/primary.navigation";
 const MobileNavigation = () => {
   return (
     <Sheet>
-      <SheetTrigger className='lg:hidden p-2 border border-white rounded-md hover:bg-white/10 transition-colors'>
+      <SheetTrigger
+        aria-label='Open main menu'
+        className='lg:hidden p-2 border border-white rounded-md hover:bg-white/10 transition-colors'
+      >
         <Menu size={24} />
       </SheetTrigger>
       <SheetContent className='bg-card p-4'>
