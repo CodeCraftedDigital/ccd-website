@@ -609,7 +609,7 @@ function TrustSignals({ stats }: { stats: any }) {
   );
 }
 
-// Related City Pages (for Solutions)
+// Related City Pages (for Solutions) - WITH SEXY HOVER EFFECTS
 async function RelatedCityPages({ serviceKey }: { serviceKey: string }) {
   const cityPages = await getRelatedCityPages(serviceKey);
 
@@ -629,9 +629,11 @@ async function RelatedCityPages({ serviceKey }: { serviceKey: string }) {
             <Link
               key={city._id}
               href={`/${city.slug.current}`}
-              className='p-4 rounded-lg bg-card border border-white/10 hover:border-primary transition-colors text-center'
+              className='group p-4 rounded-lg bg-card border border-white/10 hover:border-primary hover:bg-primary/5 transition-all duration-300 text-center cursor-pointer transform hover:scale-105 hover:shadow-lg hover:shadow-primary/20'
             >
-              <span className='text-white font-medium'>{city.cityDisplay}</span>
+              <span className='text-white font-medium group-hover:text-primary transition-colors'>
+                {city.cityDisplay}
+              </span>
             </Link>
           ))}
         </div>
@@ -640,7 +642,7 @@ async function RelatedCityPages({ serviceKey }: { serviceKey: string }) {
   );
 }
 
-// Related City Pages for SEO Pages (shows other cities with same service)
+// Related City Pages for SEO Pages - WITH SEXY HOVER EFFECTS
 async function SeoPageCityLinks({
   service,
   currentCity,
@@ -682,9 +684,11 @@ async function SeoPageCityLinks({
             <Link
               key={city._id}
               href={`/${city.slug.current}`}
-              className='p-4 rounded-lg bg-card border border-white/10 hover:border-primary transition-colors text-center'
+              className='group p-4 rounded-lg bg-card border border-white/10 hover:border-primary hover:bg-primary/5 transition-all duration-300 text-center cursor-pointer transform hover:scale-105 hover:shadow-lg hover:shadow-primary/20'
             >
-              <span className='text-white font-medium'>{city.cityDisplay}</span>
+              <span className='text-white font-medium group-hover:text-primary transition-colors'>
+                {city.cityDisplay}
+              </span>
             </Link>
           ))}
         </div>
