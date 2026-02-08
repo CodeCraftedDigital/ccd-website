@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import Image from "next/image";
 
 export function HeroParallax() {
   const ref = useRef(null);
@@ -16,14 +15,7 @@ export function HeroParallax() {
   return (
     <div ref={ref} className='absolute inset-0'>
       <motion.div style={{ y }} className='absolute inset-0 z-0'>
-        <Image
-          src='/hero-background.jpg'
-          alt='Code Crafted Digital'
-          fill
-          className='object-cover'
-          priority
-          quality={90}
-        />
+        {/* Pure gradient background - no image for max performance */}
         <div className='absolute inset-0 bg-gradient-to-br from-background via-background/95 to-background/80' />
       </motion.div>
     </div>
