@@ -14,11 +14,12 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
-// Default trust signals
+// Default trust signals - UPDATED TO MATCH HOMEPAGE
 const DEFAULT_STATS = {
-  clientCount: "500+ Michigan businesses served",
-  yearFounded: "Since 2015",
-  projectsCompleted: "1000+ projects delivered",
+  projects: "150+",
+  satisfaction: "100%",
+  reviews: "41",
+  experience: "10+",
 };
 
 // CTA Defaults
@@ -31,7 +32,7 @@ const CTA_DEFAULTS = {
   secondaryUrl: "https://fantastical.app/andrewnichols/code-crafted-digital",
 };
 
-// Fetch content by slug - checks both pages and solutions
+// Fetch content by slug - checks pages, solutions, AND seoPages
 async function getContent(slug: string) {
   // First check if it's a solution
   const solution = await client.fetch(
@@ -60,7 +61,35 @@ async function getContent(slug: string) {
 
   if (solution) return solution;
 
-  // Then check if it's a page
+  // Then check if it's a seoPage
+  const seoPage = await client.fetch(
+    `
+    *[_type == "seoPage" && slug.current == $slug][0] {
+      _id,
+      _type,
+      title,
+      slug,
+      service,
+      city,
+      cityDisplay,
+      state,
+      content,
+      hideCta,
+      ctaHeading,
+      ctaText,
+      ctaPrimaryLabel,
+      ctaPrimaryUrl,
+      ctaSecondaryLabel,
+      ctaSecondaryUrl,
+      seo
+    }
+  `,
+    { slug },
+  );
+
+  if (seoPage) return seoPage;
+
+  // Finally check if it's a page
   const page = await client.fetch(
     `
     *[_type == "page" && slug.current == $slug][0] {
@@ -85,7 +114,36 @@ async function getContent(slug: string) {
   return page;
 }
 
-// Generate static params for all pages AND solutions
+// Fetch related city pages for solutions
+async function getRelatedCityPages(serviceKey: string) {
+  return await client.fetch(
+    `
+    *[_type == "seoPage" && service == $serviceKey] | order(cityDisplay asc) {
+      _id,
+      title,
+      cityDisplay,
+      slug
+    }
+  `,
+    { serviceKey },
+  );
+}
+
+// Fetch parent solution for seoPages
+async function getParentSolution(service: string) {
+  return await client.fetch(
+    `
+    *[_type == "solution" && serviceKey == $service][0] {
+      _id,
+      title,
+      slug
+    }
+  `,
+    { service },
+  );
+}
+
+// Generate static params for all pages, solutions, AND seoPages
 export async function generateStaticParams() {
   const pages = await client.fetch(`
     *[_type == "page"] {
@@ -99,9 +157,17 @@ export async function generateStaticParams() {
     }
   `);
 
-  return [...pages, ...solutions].map((item: { slug: string }) => ({
-    slug: item.slug,
-  }));
+  const seoPages = await client.fetch(`
+    *[_type == "seoPage"] {
+      "slug": slug.current
+    }
+  `);
+
+  return [...pages, ...solutions, ...seoPages].map(
+    (item: { slug: string }) => ({
+      slug: item.slug,
+    }),
+  );
 }
 
 // Generate metadata for SEO
@@ -187,7 +253,40 @@ export async function generateMetadata({
               : []),
           ],
         }
-      : undefined;
+      : content._type === "seoPage"
+        ? {
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Service",
+                name: content.title,
+                serviceType: content.service,
+                provider: {
+                  "@type": "LocalBusiness",
+                  name: "Code Crafted Digital",
+                  telephone: "810-221-8844",
+                  address: {
+                    "@type": "PostalAddress",
+                    streetAddress: "546 E Reid Road",
+                    addressLocality: "Grand Blanc",
+                    addressRegion: "MI",
+                    postalCode: "48423",
+                    addressCountry: "US",
+                  },
+                  areaServed: {
+                    "@type": "City",
+                    name: content.cityDisplay,
+                    addressRegion: "MI",
+                  },
+                },
+                areaServed: {
+                  "@type": "City",
+                  name: content.cityDisplay,
+                },
+              },
+            ],
+          }
+        : undefined;
 
   return {
     title: content.seo?.metaTitle || content.title,
@@ -371,6 +470,75 @@ function SolutionHeroBlock({ block }: { block: any }) {
   );
 }
 
+// Hero for SEO Pages (City Pages) - With breadcrumbs back to parent solution
+async function SeoPageHeroBlock({
+  block,
+  content,
+}: {
+  block: any;
+  content: any;
+}) {
+  const parentSolution = await getParentSolution(content.service);
+
+  return (
+    <section className='relative w-full h-[40vh] md:h-[50vh] flex items-end overflow-hidden'>
+      {block.image && (
+        <>
+          <Image
+            src={urlFor(block.image).width(1920).quality(85).url()}
+            alt={block.image.alt || block.heading}
+            fill
+            className='object-cover'
+            priority
+            sizes='100vw'
+          />
+          <div
+            className='absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/20'
+            aria-hidden='true'
+          />
+          <div
+            className='absolute inset-0 bg-gradient-to-r from-background/50 to-transparent'
+            aria-hidden='true'
+          />
+        </>
+      )}
+
+      <Container className='relative z-10 pb-6 md:pb-10'>
+        {/* Breadcrumbs */}
+        <nav className='mb-4 md:mb-6 text-sm text-gray-400'>
+          <Link href='/' className='hover:text-white transition-colors'>
+            Home
+          </Link>
+          <span className='mx-2'>/</span>
+          <Link
+            href='/solutions'
+            className='hover:text-white transition-colors'
+          >
+            Solutions
+          </Link>
+          {parentSolution && (
+            <>
+              <span className='mx-2'>/</span>
+              <Link
+                href={`/${parentSolution.slug.current}`}
+                className='hover:text-white transition-colors'
+              >
+                {parentSolution.title}
+              </Link>
+            </>
+          )}
+          <span className='mx-2'>/</span>
+          <span className='text-white'>{content.cityDisplay}</span>
+        </nav>
+
+        <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-tight text-white max-w-5xl'>
+          {block.heading}
+        </h1>
+      </Container>
+    </section>
+  );
+}
+
 // Rich Text Block
 function RichTextBlock({ block }: { block: any }) {
   return (
@@ -385,38 +553,35 @@ function RichTextBlock({ block }: { block: any }) {
   );
 }
 
-// Trust Signals (Solutions only)
+// Trust Signals - UPDATED WITH CORRECT STATS
 function TrustSignals({ stats }: { stats: any }) {
-  const clientCount = stats?.clientCount || DEFAULT_STATS.clientCount;
-  const yearFounded = stats?.yearFounded || DEFAULT_STATS.yearFounded;
-  const projectsCompleted =
-    stats?.projectsCompleted || DEFAULT_STATS.projectsCompleted;
-
   return (
     <Container className='py-10 md:py-14'>
       <div className='max-w-3xl mx-auto'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 p-8 rounded-2xl bg-card border border-white/10'>
+        <div className='grid grid-cols-2 lg:grid-cols-4 gap-6 p-8 rounded-2xl bg-card border border-white/10'>
           <div className='text-center'>
             <div className='text-3xl font-bold text-primary mb-2'>
-              {clientCount.split(" ")[0]}
+              {DEFAULT_STATS.projects}
             </div>
-            <div className='text-sm text-gray-400'>
-              {clientCount.split(" ").slice(1).join(" ")}
-            </div>
+            <div className='text-sm text-gray-400'>Projects Delivered</div>
           </div>
           <div className='text-center'>
             <div className='text-3xl font-bold text-primary mb-2'>
-              {yearFounded.replace("Since ", "")}
+              {DEFAULT_STATS.satisfaction}
             </div>
-            <div className='text-sm text-gray-400'>Founded</div>
+            <div className='text-sm text-gray-400'>Client Satisfaction</div>
           </div>
           <div className='text-center'>
             <div className='text-3xl font-bold text-primary mb-2'>
-              {projectsCompleted.split(" ")[0]}
+              {DEFAULT_STATS.reviews}
             </div>
-            <div className='text-sm text-gray-400'>
-              {projectsCompleted.split(" ").slice(1).join(" ")}
+            <div className='text-sm text-gray-400'>Five-Star Reviews</div>
+          </div>
+          <div className='text-center'>
+            <div className='text-3xl font-bold text-primary mb-2'>
+              {DEFAULT_STATS.experience}
             </div>
+            <div className='text-sm text-gray-400'>Years Experience</div>
           </div>
         </div>
       </div>
@@ -424,7 +589,91 @@ function TrustSignals({ stats }: { stats: any }) {
   );
 }
 
-// FAQ Section (Solutions only)
+// Related City Pages (for Solutions)
+async function RelatedCityPages({ serviceKey }: { serviceKey: string }) {
+  const cityPages = await getRelatedCityPages(serviceKey);
+
+  if (!cityPages || cityPages.length === 0) return null;
+
+  return (
+    <Container className='py-10 md:py-14'>
+      <div className='max-w-3xl mx-auto'>
+        <h2 className='text-2xl md:text-3xl font-bold mb-8 text-white'>
+          {serviceKey
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase())}{" "}
+          in Michigan Cities
+        </h2>
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+          {cityPages.map((city: any) => (
+            <Link
+              key={city._id}
+              href={`/${city.slug.current}`}
+              className='p-4 rounded-lg bg-card border border-white/10 hover:border-primary transition-colors text-center'
+            >
+              <span className='text-white font-medium'>{city.cityDisplay}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </Container>
+  );
+}
+
+// Related City Pages for SEO Pages (shows other cities with same service)
+async function SeoPageCityLinks({
+  service,
+  currentCity,
+}: {
+  service: string;
+  currentCity: string;
+}) {
+  const cityPages = await getRelatedCityPages(service);
+  const parentSolution = await getParentSolution(service);
+
+  // Filter out current city
+  const otherCities = cityPages.filter(
+    (city: any) => city.cityDisplay !== currentCity,
+  );
+
+  if (!otherCities || otherCities.length === 0) return null;
+
+  return (
+    <Container className='py-10 md:py-14'>
+      <div className='max-w-3xl mx-auto'>
+        <h2 className='text-2xl md:text-3xl font-bold mb-4 text-white'>
+          {service.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}{" "}
+          in Other Michigan Cities
+        </h2>
+        {parentSolution && (
+          <p className='text-gray-300 mb-6'>
+            View our{" "}
+            <Link
+              href={`/${parentSolution.slug.current}`}
+              className='text-primary hover:underline'
+            >
+              {parentSolution.title}
+            </Link>{" "}
+            services in other Michigan locations:
+          </p>
+        )}
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+          {otherCities.map((city: any) => (
+            <Link
+              key={city._id}
+              href={`/${city.slug.current}`}
+              className='p-4 rounded-lg bg-card border border-white/10 hover:border-primary transition-colors text-center'
+            >
+              <span className='text-white font-medium'>{city.cityDisplay}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </Container>
+  );
+}
+
+// FAQ Section
 function FAQSection({ faqs }: { faqs: any[] }) {
   if (!faqs || faqs.length === 0) return null;
 
@@ -489,14 +738,18 @@ function CTA({ content }: { content: any }) {
 }
 
 // Block Renderer
-function renderBlock(block: any, index: number, isSolution: boolean) {
+async function renderBlock(block: any, index: number, content: any) {
+  const contentType = content._type;
+
   switch (block._type) {
     case "hero":
-      return isSolution ? (
-        <SolutionHeroBlock key={index} block={block} />
-      ) : (
-        <PageHeroBlock key={index} block={block} />
-      );
+      if (contentType === "solution") {
+        return <SolutionHeroBlock key={index} block={block} />;
+      } else if (contentType === "seoPage") {
+        return <SeoPageHeroBlock key={index} block={block} content={content} />;
+      } else {
+        return <PageHeroBlock key={index} block={block} />;
+      }
     case "richText":
       return <RichTextBlock key={index} block={block} />;
     default:
@@ -517,14 +770,29 @@ export default async function Page({
   }
 
   const isSolution = content._type === "solution";
+  const isSeoPage = content._type === "seoPage";
+
+  // Render content blocks
+  const renderedBlocks = await Promise.all(
+    content.content?.map((block: any, index: number) =>
+      renderBlock(block, index, content),
+    ) || [],
+  );
 
   return (
     <>
-      {content.content?.map((block: any, index: number) =>
-        renderBlock(block, index, isSolution),
+      {renderedBlocks}
+      {(isSolution || isSeoPage) && <TrustSignals stats={content.stats} />}
+      {isSolution && content.serviceKey && (
+        <RelatedCityPages serviceKey={content.serviceKey} />
       )}
-      {isSolution && <TrustSignals stats={content.stats} />}
-      {isSolution && <FAQSection faqs={content.faqs} />}
+      {isSeoPage && content.service && (
+        <SeoPageCityLinks
+          service={content.service}
+          currentCity={content.cityDisplay}
+        />
+      )}
+      {(isSolution || isSeoPage) && <FAQSection faqs={content.faqs} />}
       {!content.hideCta && <CTA content={content} />}
     </>
   );
