@@ -62,7 +62,7 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href='/our-work'
+                href='/'
                 className='text-muted-foreground hover:text-ccd-blue transition-colors duration-300 text-sm'
               >
                 Our Work

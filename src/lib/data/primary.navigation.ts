@@ -9,5 +9,5 @@ export const navigationLinks: readonly NavigationLink[] = [
   { id: 2, title: "About", href: "/about" },
   { id: 3, title: "Solutions", href: "/solutions" },
   { id: 4, title: "Blog", href: "/blog" },
-  { id: 5, title: "Our Work", href: "/our-work" },
+  { id: 5, title: "Our Work", href: "/" },
 ];
