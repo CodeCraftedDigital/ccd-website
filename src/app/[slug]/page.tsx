@@ -14,6 +14,13 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
+// Default trust signals
+const DEFAULT_STATS = {
+  clientCount: "500+ Michigan businesses served",
+  yearFounded: "Since 2015",
+  projectsCompleted: "1000+ projects delivered",
+};
+
 // CTA Defaults
 const CTA_DEFAULTS = {
   heading: "Ready to elevate your digital presence?",
@@ -24,12 +31,41 @@ const CTA_DEFAULTS = {
   secondaryUrl: "https://fantastical.app/andrewnichols/code-crafted-digital",
 };
 
-// Fetch page by slug
-async function getPage(slug: string) {
-  return client.fetch(
+// Fetch content by slug - checks both pages and solutions
+async function getContent(slug: string) {
+  // First check if it's a solution
+  const solution = await client.fetch(
+    `
+    *[_type == "solution" && slug.current == $slug][0] {
+      _id,
+      _type,
+      title,
+      slug,
+      serviceKey,
+      content,
+      stats,
+      faqs,
+      hideCta,
+      ctaHeading,
+      ctaText,
+      ctaPrimaryLabel,
+      ctaPrimaryUrl,
+      ctaSecondaryLabel,
+      ctaSecondaryUrl,
+      seo
+    }
+  `,
+    { slug },
+  );
+
+  if (solution) return solution;
+
+  // Then check if it's a page
+  const page = await client.fetch(
     `
     *[_type == "page" && slug.current == $slug][0] {
       _id,
+      _type,
       title,
       slug,
       content,
@@ -45,9 +81,11 @@ async function getPage(slug: string) {
   `,
     { slug },
   );
+
+  return page;
 }
 
-// Generate static params for all pages
+// Generate static params for all pages AND solutions
 export async function generateStaticParams() {
   const pages = await client.fetch(`
     *[_type == "page"] {
@@ -55,8 +93,14 @@ export async function generateStaticParams() {
     }
   `);
 
-  return pages.map((page: { slug: string }) => ({
-    slug: page.slug,
+  const solutions = await client.fetch(`
+    *[_type == "solution"] {
+      "slug": slug.current
+    }
+  `);
+
+  return [...pages, ...solutions].map((item: { slug: string }) => ({
+    slug: item.slug,
   }));
 }
 
@@ -67,21 +111,96 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const page = await getPage(slug);
+  const content = await getContent(slug);
 
-  if (!page) {
+  if (!content) {
     return {
       title: "Page Not Found",
     };
   }
 
+  // Generate schema for solutions
+  const schema =
+    content._type === "solution"
+      ? {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Service",
+              name: content.title,
+              serviceType: content.serviceKey,
+              provider: {
+                "@type": "LocalBusiness",
+                name: "Code Crafted Digital",
+                telephone: "810-221-8844",
+                address: {
+                  "@type": "PostalAddress",
+                  streetAddress: "546 E Reid Road",
+                  addressLocality: "Grand Blanc",
+                  addressRegion: "MI",
+                  postalCode: "48423",
+                  addressCountry: "US",
+                },
+                areaServed: {
+                  "@type": "State",
+                  name: "Michigan",
+                },
+              },
+              areaServed: "Michigan",
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://codecrafteddigital.com",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Solutions",
+                  item: "https://codecrafteddigital.com/solutions",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: content.title,
+                },
+              ],
+            },
+            ...(content.faqs && content.faqs.length > 0
+              ? [
+                  {
+                    "@type": "FAQPage",
+                    mainEntity: content.faqs.map((faq: any) => ({
+                      "@type": "Question",
+                      name: faq.question,
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: faq.answer,
+                      },
+                    })),
+                  },
+                ]
+              : []),
+          ],
+        }
+      : undefined;
+
   return {
-    title: page.seo?.metaTitle || page.title,
-    description: page.seo?.metaDescription || "",
+    title: content.seo?.metaTitle || content.title,
+    description: content.seo?.metaDescription || "",
     openGraph: {
-      title: page.seo?.metaTitle || page.title,
-      description: page.seo?.metaDescription || "",
+      title: content.seo?.metaTitle || content.title,
+      description: content.seo?.metaDescription || "",
     },
+    ...(schema && {
+      other: {
+        "application/ld+json": JSON.stringify(schema),
+      },
+    }),
   };
 }
 
@@ -172,11 +291,10 @@ const portableTextComponents: PortableTextComponents = {
   },
 };
 
-// Hero - Centered, clean, premium
-function HeroBlock({ block }: { block: any }) {
+// Hero for Pages - Centered, clean
+function PageHeroBlock({ block }: { block: any }) {
   return (
     <section className='relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-hidden'>
-      {/* Background Image */}
       {block.image && (
         <>
           <Image
@@ -203,6 +321,56 @@ function HeroBlock({ block }: { block: any }) {
   );
 }
 
+// Hero for Solutions - With breadcrumbs, image-focused
+function SolutionHeroBlock({ block }: { block: any }) {
+  return (
+    <section className='relative w-full h-[40vh] md:h-[50vh] flex items-end overflow-hidden'>
+      {block.image && (
+        <>
+          <Image
+            src={urlFor(block.image).width(1920).quality(85).url()}
+            alt={block.image.alt || block.heading}
+            fill
+            className='object-cover'
+            priority
+            sizes='100vw'
+          />
+          <div
+            className='absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/20'
+            aria-hidden='true'
+          />
+          <div
+            className='absolute inset-0 bg-gradient-to-r from-background/50 to-transparent'
+            aria-hidden='true'
+          />
+        </>
+      )}
+
+      <Container className='relative z-10 pb-6 md:pb-10'>
+        {/* Breadcrumbs */}
+        <nav className='mb-4 md:mb-6 text-sm text-gray-400'>
+          <Link href='/' className='hover:text-white transition-colors'>
+            Home
+          </Link>
+          <span className='mx-2'>/</span>
+          <Link
+            href='/solutions'
+            className='hover:text-white transition-colors'
+          >
+            Solutions
+          </Link>
+          <span className='mx-2'>/</span>
+          <span className='text-white'>{block.heading}</span>
+        </nav>
+
+        <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight tracking-tight text-white max-w-5xl'>
+          {block.heading}
+        </h1>
+      </Container>
+    </section>
+  );
+}
+
 // Rich Text Block
 function RichTextBlock({ block }: { block: any }) {
   return (
@@ -217,14 +385,82 @@ function RichTextBlock({ block }: { block: any }) {
   );
 }
 
+// Trust Signals (Solutions only)
+function TrustSignals({ stats }: { stats: any }) {
+  const clientCount = stats?.clientCount || DEFAULT_STATS.clientCount;
+  const yearFounded = stats?.yearFounded || DEFAULT_STATS.yearFounded;
+  const projectsCompleted =
+    stats?.projectsCompleted || DEFAULT_STATS.projectsCompleted;
+
+  return (
+    <Container className='py-10 md:py-14'>
+      <div className='max-w-3xl mx-auto'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 p-8 rounded-2xl bg-card border border-white/10'>
+          <div className='text-center'>
+            <div className='text-3xl font-bold text-primary mb-2'>
+              {clientCount.split(" ")[0]}
+            </div>
+            <div className='text-sm text-gray-400'>
+              {clientCount.split(" ").slice(1).join(" ")}
+            </div>
+          </div>
+          <div className='text-center'>
+            <div className='text-3xl font-bold text-primary mb-2'>
+              {yearFounded.replace("Since ", "")}
+            </div>
+            <div className='text-sm text-gray-400'>Founded</div>
+          </div>
+          <div className='text-center'>
+            <div className='text-3xl font-bold text-primary mb-2'>
+              {projectsCompleted.split(" ")[0]}
+            </div>
+            <div className='text-sm text-gray-400'>
+              {projectsCompleted.split(" ").slice(1).join(" ")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>
+  );
+}
+
+// FAQ Section (Solutions only)
+function FAQSection({ faqs }: { faqs: any[] }) {
+  if (!faqs || faqs.length === 0) return null;
+
+  return (
+    <Container className='py-10 md:py-14'>
+      <div className='max-w-3xl mx-auto'>
+        <h2 className='text-2xl md:text-3xl font-bold mb-8 text-white'>
+          Frequently Asked Questions
+        </h2>
+        <div className='space-y-6'>
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className='p-6 rounded-lg bg-card border border-white/10'
+            >
+              <h3 className='text-lg font-semibold text-white mb-3'>
+                {faq.question}
+              </h3>
+              <p className='text-gray-300 leading-relaxed'>{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Container>
+  );
+}
+
 // CTA
-function CTA({ page }: { page: any }) {
-  const heading = page.ctaHeading || CTA_DEFAULTS.heading;
-  const text = page.ctaText || CTA_DEFAULTS.text;
-  const primaryLabel = page.ctaPrimaryLabel || CTA_DEFAULTS.primaryLabel;
-  const primaryUrl = page.ctaPrimaryUrl || CTA_DEFAULTS.primaryUrl;
-  const secondaryLabel = page.ctaSecondaryLabel || CTA_DEFAULTS.secondaryLabel;
-  const secondaryUrl = page.ctaSecondaryUrl || CTA_DEFAULTS.secondaryUrl;
+function CTA({ content }: { content: any }) {
+  const heading = content.ctaHeading || CTA_DEFAULTS.heading;
+  const text = content.ctaText || CTA_DEFAULTS.text;
+  const primaryLabel = content.ctaPrimaryLabel || CTA_DEFAULTS.primaryLabel;
+  const primaryUrl = content.ctaPrimaryUrl || CTA_DEFAULTS.primaryUrl;
+  const secondaryLabel =
+    content.ctaSecondaryLabel || CTA_DEFAULTS.secondaryLabel;
+  const secondaryUrl = content.ctaSecondaryUrl || CTA_DEFAULTS.secondaryUrl;
 
   return (
     <Container className='pt-4 pb-16 md:pt-6 md:pb-20'>
@@ -253,10 +489,14 @@ function CTA({ page }: { page: any }) {
 }
 
 // Block Renderer
-function renderBlock(block: any, index: number) {
+function renderBlock(block: any, index: number, isSolution: boolean) {
   switch (block._type) {
     case "hero":
-      return <HeroBlock key={index} block={block} />;
+      return isSolution ? (
+        <SolutionHeroBlock key={index} block={block} />
+      ) : (
+        <PageHeroBlock key={index} block={block} />
+      );
     case "richText":
       return <RichTextBlock key={index} block={block} />;
     default:
@@ -270,18 +510,22 @@ export default async function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getPage(slug);
+  const content = await getContent(slug);
 
-  if (!page) {
+  if (!content) {
     notFound();
   }
 
+  const isSolution = content._type === "solution";
+
   return (
     <>
-      {page.content?.map((block: any, index: number) =>
-        renderBlock(block, index),
+      {content.content?.map((block: any, index: number) =>
+        renderBlock(block, index, isSolution),
       )}
-      {!page.hideCta && <CTA page={page} />}
+      {isSolution && <TrustSignals stats={content.stats} />}
+      {isSolution && <FAQSection faqs={content.faqs} />}
+      {!content.hideCta && <CTA content={content} />}
     </>
   );
 }
