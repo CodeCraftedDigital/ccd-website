@@ -692,11 +692,12 @@ export default function HomePage() {
               size='lg'
               variant='outline'
               className='group'
-              href='https://search.google.com/local/reviews?placeid=ChIJS9it2PlmI4gRDS-pkTQ9avE'
-              target='_blank'
               rel='noopener noreferrer'
             >
-              <a>
+              <a
+                href='https://search.google.com/local/reviews?placeid=ChIJS9it2PlmI4gRDS-pkTQ9avE'
+                target='_blank'
+              >
                 Read All Reviews
                 <ArrowRight className='ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform' />
               </a>
