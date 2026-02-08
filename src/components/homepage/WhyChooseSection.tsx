@@ -1,5 +1,6 @@
 import Container from "@/components/layout/Container";
 import { Rocket, MapPin, DollarSign, MessageSquare } from "lucide-react";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 const pillars = [
   {
@@ -31,25 +32,29 @@ const pillars = [
 export function WhyChooseSection() {
   return (
     <Container className='py-16 md:py-24'>
-      <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mb-12'>
-        Why Choose Code Crafted Digital
-      </h2>
+      <FadeIn>
+        <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center mb-12'>
+          Why Choose Code Crafted Digital
+        </h2>
+      </FadeIn>
 
       <div className='grid sm:grid-cols-2 lg:grid-cols-4 gap-8'>
         {pillars.map((pillar, i) => {
           const IconComponent = pillar.icon;
           return (
-            <div key={i} className='text-center group'>
-              <div className='inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors'>
-                <IconComponent className='w-8 h-8 text-primary' />
+            <FadeIn key={i} delay={i * 0.1}>
+              <div className='text-center group'>
+                <div className='inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors'>
+                  <IconComponent className='w-8 h-8 text-primary' />
+                </div>
+                <h3 className='text-xl font-bold text-white mb-3'>
+                  {pillar.title}
+                </h3>
+                <p className='text-gray-300 leading-relaxed'>
+                  {pillar.description}
+                </p>
               </div>
-              <h3 className='text-xl font-bold text-white mb-3'>
-                {pillar.title}
-              </h3>
-              <p className='text-gray-300 leading-relaxed'>
-                {pillar.description}
-              </p>
-            </div>
+            </FadeIn>
           );
         })}
       </div>

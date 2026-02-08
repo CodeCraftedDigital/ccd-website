@@ -1,6 +1,7 @@
 import Container from "@/components/layout/Container";
 import { Award, Users, TrendingUp, Clock } from "lucide-react";
 import { AnimatedCounter } from "./AnimatedCounter";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 const stats = [
   { icon: Award, value: 150, suffix: "+", label: "Projects Delivered" },
@@ -17,15 +18,17 @@ export function StatsSection() {
           {stats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <div key={index} className='text-center'>
-                <div className='inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4'>
-                  <IconComponent className='w-6 h-6 text-primary' />
+              <FadeIn key={index} delay={index * 0.1}>
+                <div className='text-center'>
+                  <div className='inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4'>
+                    <IconComponent className='w-6 h-6 text-primary' />
+                  </div>
+                  <div className='text-4xl md:text-5xl font-bold text-white mb-2'>
+                    <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                  </div>
+                  <div className='text-sm text-gray-400'>{stat.label}</div>
                 </div>
-                <div className='text-4xl md:text-5xl font-bold text-white mb-2'>
-                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className='text-sm text-gray-400'>{stat.label}</div>
-              </div>
+              </FadeIn>
             );
           })}
         </div>

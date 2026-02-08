@@ -3,7 +3,7 @@ import { StatsSection } from "@/components/homepage/StatsSection";
 import { TechStackMarquee } from "@/components/homepage/TechStackMarquee";
 import { ProblemSolutionSection } from "@/components/homepage/ProblemSolution";
 import { FeaturedSolutionsSection } from "@/components/homepage/FeaturedSolutions";
-import { WhyChooseSection } from "@/components/homepage/WhoChooseSection";
+import { WhyChooseSection } from "@/components/homepage/WhyChooseSection";
 import { ReviewsSection } from "@/components/homepage/ReviewsSection";
 import { FinalCTASection } from "@/components/homepage/FinalCtaSection";
 import { Metadata } from "next";
