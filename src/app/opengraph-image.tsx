@@ -10,15 +10,10 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
-  // Fetch the SVG logo
-  const logoData = await fetch(
-    new URL("/images/ccd-logo-white.svg", import.meta.url),
-  ).then((res) => res.arrayBuffer());
-
   return new ImageResponse(
     <div
       style={{
-        background: "#000000",
+        background: "linear-gradient(135deg, #000000 0%, #0062a4 100%)",
         width: "100%",
         height: "100%",
         display: "flex",
@@ -28,28 +23,41 @@ export default async function Image() {
         padding: "80px",
       }}
     >
-      {/* Logo */}
-      <img
-        // @ts-ignore
-        src={logoData}
-        alt='Code Crafted Digital Logo'
-        width='250'
-        height='250'
-        style={{ marginBottom: 50 }}
-      />
+      {/* Company Name */}
+      <div
+        style={{
+          fontSize: 80,
+          fontWeight: "bold",
+          color: "#ffffff",
+          textAlign: "center",
+          marginBottom: 40,
+          letterSpacing: "-2px",
+        }}
+      >
+        Code Crafted Digital
+      </div>
 
       {/* Tagline */}
       <div
         style={{
-          fontSize: 52,
-          color: "#0062a4",
+          fontSize: 48,
+          color: "#ffffff",
           textAlign: "center",
-          fontWeight: 600,
-          lineHeight: 1.3,
+          opacity: 0.9,
         }}
       >
         Enterprise Software Engineering for Michigan
       </div>
+
+      {/* Accent bar */}
+      <div
+        style={{
+          width: "200px",
+          height: "4px",
+          background: "#ffffff",
+          marginTop: 40,
+        }}
+      />
     </div>,
     {
       ...size,
