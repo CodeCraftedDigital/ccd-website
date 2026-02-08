@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { client } from "@/lib/sanity";
 
-export default async function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://codecrafteddigital.com";
 
   // Fetch solutions
