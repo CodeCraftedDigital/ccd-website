@@ -11,7 +11,19 @@ import { Button } from "@/components/ui/button";
 const builder = imageUrlBuilder(client);
 
 function urlFor(source: any) {
-  return builder.image(source);
+  // Bulletproof check - return null if source is invalid
+  if (!source || typeof source !== "object") {
+    return null;
+  }
+  if (!source.asset || (!source.asset._ref && !source.asset._id)) {
+    return null;
+  }
+  try {
+    return builder.image(source);
+  } catch (error) {
+    console.error("Error building image URL:", error);
+    return null;
+  }
 }
 
 // Default trust signals - UPDATED TO MATCH HOMEPAGE
@@ -392,12 +404,15 @@ const portableTextComponents: PortableTextComponents = {
 
 // Hero for Pages - Centered, clean
 function PageHeroBlock({ block }: { block: any }) {
+  const imageUrl = block.image ? urlFor(block.image) : null;
+  const hasImage = imageUrl !== null;
+
   return (
     <section className='relative pt-16 pb-10 md:pt-24 md:pb-14 overflow-hidden'>
-      {block.image && (
+      {hasImage && (
         <>
           <Image
-            src={urlFor(block.image).width(1920).height(1080).quality(85).url()}
+            src={imageUrl.width(1920).height(1080).quality(85).url()}
             alt={block.image.alt || block.heading}
             fill
             className='object-cover'
@@ -422,12 +437,15 @@ function PageHeroBlock({ block }: { block: any }) {
 
 // Hero for Solutions - With breadcrumbs, image-focused
 function SolutionHeroBlock({ block }: { block: any }) {
+  const imageUrl = block.image ? urlFor(block.image) : null;
+  const hasImage = imageUrl !== null;
+
   return (
     <section className='relative w-full h-[40vh] md:h-[50vh] flex items-end overflow-hidden'>
-      {block.image && (
+      {hasImage && (
         <>
           <Image
-            src={urlFor(block.image).width(1920).quality(85).url()}
+            src={imageUrl.width(1920).quality(85).url()}
             alt={block.image.alt || block.heading}
             fill
             className='object-cover'
@@ -479,13 +497,15 @@ async function SeoPageHeroBlock({
   content: any;
 }) {
   const parentSolution = await getParentSolution(content.service);
+  const imageUrl = block.image ? urlFor(block.image) : null;
+  const hasImage = imageUrl !== null;
 
   return (
     <section className='relative w-full h-[40vh] md:h-[50vh] flex items-end overflow-hidden'>
-      {block.image && (
+      {hasImage && (
         <>
           <Image
-            src={urlFor(block.image).width(1920).quality(85).url()}
+            src={imageUrl.width(1920).quality(85).url()}
             alt={block.image.alt || block.heading}
             fill
             className='object-cover'
