@@ -232,7 +232,7 @@ export default async function BlogPostPage({
   return (
     <>
       {/* Hero Section */}
-      <div className='relative w-full h-[30vh] md:h-[30vh] flex items-end overflow-hidden'>
+      <div className='relative w-full h-[50vh] md:h-[60vh] flex items-end overflow-hidden'>
         {/* Background Image */}
         {post.image ? (
           <Image
