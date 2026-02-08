@@ -13,7 +13,7 @@ export function StaggerChildren({
   className = "",
 }: StaggerChildrenProps) {
   return (
-    <motion.div
+    <motion.ul
       initial='hidden'
       whileInView='visible'
       viewport={{ once: true }}
@@ -21,7 +21,7 @@ export function StaggerChildren({
       className={className}
     >
       {children}
-    </motion.div>
+    </motion.ul>
   );
 }
 
@@ -33,7 +33,7 @@ export function StaggerItem({
   className?: string;
 }) {
   return (
-    <motion.div
+    <motion.li
       variants={{
         hidden: { opacity: 0, x: -20 },
         visible: { opacity: 1, x: 0 },
@@ -42,6 +42,6 @@ export function StaggerItem({
       className={className}
     >
       {children}
-    </motion.div>
+    </motion.li>
   );
 }

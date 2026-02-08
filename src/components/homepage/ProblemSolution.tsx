@@ -38,17 +38,17 @@ export function ProblemSolutionSection() {
             <h3 className='text-2xl md:text-3xl font-bold text-white mb-6'>
               How We Work Differently
             </h3>
-            <StaggerChildren>
-              <ul className='space-y-4'>
-                {benefits.map((text, i) => (
-                  <StaggerItem key={i}>
-                    <li className='flex items-start gap-3 text-gray-300'>
-                      <CheckCircle2 className='mt-1 w-5 h-5 text-primary flex-shrink-0' />
-                      <span className='leading-relaxed'>{text}</span>
-                    </li>
-                  </StaggerItem>
-                ))}
-              </ul>
+            {/* StaggerChildren now renders <ul>, StaggerItem renders <li> */}
+            <StaggerChildren className='space-y-4'>
+              {benefits.map((text, i) => (
+                <StaggerItem
+                  key={i}
+                  className='flex items-start gap-3 text-gray-300'
+                >
+                  <CheckCircle2 className='mt-1 w-5 h-5 text-primary flex-shrink-0' />
+                  <span className='leading-relaxed'>{text}</span>
+                </StaggerItem>
+              ))}
             </StaggerChildren>
           </div>
         </SlideIn>
