@@ -18,7 +18,7 @@ const CallToActionButtons = () => {
         asChild
         className='text-base bg-ccd-blue text-white hover:bg-ccd-blue-dark'
       >
-        <Link href='/contact'>Get A Quote</Link>
+        <Link href='https://zfrmz.com/cOTE35LfMFaH41ihISEm'>Get A Quote</Link>
       </Button>
     </>
   );
