@@ -1,4 +1,6 @@
 "use client";
+
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -13,8 +15,10 @@ import CallToActionButtons from "./CallToActionButtons";
 import { navigationLinks } from "@/lib/data/primary.navigation";
 
 const MobileNavigation = () => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         aria-label='Open main menu'
         className='lg:hidden p-2 border border-white rounded-md hover:bg-white/10 transition-colors'
@@ -33,6 +37,7 @@ const MobileNavigation = () => {
               key={link.id}
               href={link.href}
               className='text-lg hover:text-ccd-blue transition-colors'
+              onClick={() => setOpen(false)} // ← CLOSE ON CLICK
             >
               {link.title}
             </Link>
